@@ -10,4 +10,8 @@ Sometimes I need a nice simple binary that does enough work to be interesting,
 but mostly just sits there. This fits that niche for me.
 
 ## Container?
-Yeah there's a Dockerfile, working on ghcr publishing...
+```
+docker pull ghcr.io/scottopell/randomreader:latest
+```
+
+[ghcr package](https://github.com/scottopell/randomreader/pkgs/container/randomreader)
