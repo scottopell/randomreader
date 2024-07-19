@@ -5,8 +5,8 @@ permissions:
 
 on:
   push:
-    tags:
-      - v[0-9]+.*
+    branches:
+      - 'main'
 
 jobs:
   create-release:
@@ -17,7 +17,6 @@ jobs:
       - name: Create GitHub release
         uses: taiki-e/create-gh-release-action@v1
         with:
-          changelog: CHANGELOG.md
           token: ${{ secrets.GITHUB_TOKEN }}
 
   upload-binaries:
@@ -53,7 +52,7 @@ jobs:
           tool: cross
 
       # Run the build & upload artifacts
-      - name: Build and upload lading binaries
+      - name: Build and upload binaries
         uses: taiki-e/upload-rust-binary-action@v1
 
         with:
