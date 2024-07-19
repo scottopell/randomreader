@@ -12,6 +12,8 @@ on:
 jobs:
   create-release:
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.vars.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
 
@@ -74,9 +76,6 @@ jobs:
     steps:
       - name: Look at release version
         run: |
-          echo "Tag  needs.create-release.vars.outputs.tag : ${{ needs.create-release.vars.outputs.tag }}"
-          echo "Tag  needs.vars.outputs.tag : ${{ needs.vars.outputs.tag }}"
-          echo "Tag  needs.create-release.vars.tag  : ${{ needs.create-release.vars.tag }}"
           echo "Tag  needs.create-release.outputs.tag : ${{ needs.create-release.outputs.tag }}"
 
 # upload-container:
