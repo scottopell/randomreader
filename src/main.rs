@@ -1,16 +1,18 @@
 use clap::{ArgGroup, Parser};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
+use rand::Rng;
 use std::fs::File;
 use std::io::{self, Read};
 use std::thread::sleep;
+use std::time::Duration;
 use std::time::Instant;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about)]
 #[clap(group(
     ArgGroup::new("buffer_size")
-        .required(true)
+        .required(false)
         .args(&["buffer_size_bytes", "buffer_size_kb", "buffer_size_mb"])
 ))]
 struct Config {
@@ -29,6 +31,7 @@ struct Config {
 
 fn main() -> io::Result<()> {
     let config = Config::parse();
+    let mut rng = thread_rng();
 
     let buffer_size_bytes = if let Some(bytes) = config.buffer_size_bytes {
         bytes
@@ -40,25 +43,31 @@ fn main() -> io::Result<()> {
         config.default_buffer_size
     };
 
-    let mut buffer = vec![0u8; buffer_size_bytes];
     let mut file = File::open("/dev/urandom")?;
+    let mut current_buffer_size_bytes = buffer_size_bytes;
 
     loop {
+        let mut buffer: Vec<u8> = vec![0; current_buffer_size_bytes];
+
         let now = Instant::now();
         file.read_exact(&mut buffer)?;
         println!(
-            "Read random bytes in {}ms, now shuffling...",
+            "Read random {current_buffer_size_bytes} bytes in {}ms, now shuffling...",
             now.elapsed().as_millis()
         );
 
         // Perform a simple computation: sum the bytes
-        buffer.shuffle(&mut thread_rng());
+        buffer.shuffle(&mut rng);
         let elapsed = now.elapsed();
         println!(
             "Shuffling complete, took {}ms, now sleeping...",
             elapsed.as_millis()
         );
 
-        sleep(elapsed);
+        let adjustment = rng.gen_range(-0.5..=0.5);
+        let oldbuf = current_buffer_size_bytes;
+        current_buffer_size_bytes =
+            buffer_size_bytes.saturating_sub((buffer_size_bytes as f64 * adjustment) as usize);
+        sleep(Duration::from_millis(500));
     }
 }
