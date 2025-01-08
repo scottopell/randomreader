@@ -1,3 +1,7 @@
+//! A simple program that reads random bytes from /dev/urandom, shuffles them,
+//! and then sleeps for 500ms.
+#![warn(clippy::all, clippy::pedantic)]
+
 use clap::{ArgGroup, Parser};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
@@ -64,10 +68,9 @@ fn main() -> io::Result<()> {
             elapsed.as_millis()
         );
 
-        let adjustment = rng.gen_range(-0.5..=0.5);
-        let oldbuf = current_buffer_size_bytes;
-        current_buffer_size_bytes =
-            buffer_size_bytes.saturating_sub((buffer_size_bytes as f64 * adjustment) as usize);
+        let adjustment_percentage = rng.gen_range(-0.5..=0.5);
+        let adjustment: isize = (buffer_size_bytes as f64 * adjustment_percentage).round() as isize;
+        current_buffer_size_bytes = ((buffer_size_bytes as isize) + adjustment).max(0) as usize; // Ensure it doesn't go below zero
         sleep(Duration::from_millis(500));
     }
 }
